@@ -7,12 +7,28 @@ def statement_generator(statement, decoration, amount=3):
     """Emphasises headings by adding decoration at the start and end"""
     return f"{decoration * amount} {statement} {decoration * amount}\n"
 
-def string_checker(question, valid_ans=("yes", "no"), num_letters=1):
+def yes_no_check(question):
+    """Checks that users enter yes / no / y / n"""
+
+    while True:
+
+        response = input(question).lower()
+
+        if response == "y" or response == "yes":
+            return "yes"
+        elif response == "n" or response == "no":
+            return "no"
+
+        print(f"Please answer yes / no (y / n)")
+
+def string_checker(question, valid_ans=("yes", "no"), num_letters=1, exit=None):
     """Checks that users enter a full word
      or the 'n' letters of a word from a list of valid responses"""
 
     while True:
         response = input(question).lower()
+        if response == exit:
+            return exit
 
         for item in valid_ans:
             if response == item:
@@ -114,6 +130,7 @@ def triangle_pyramid():
 
 # variables & lists
 π = math.pi
+valid_shapes = ["cuboid", "cylinder", "triangular prism", "cone", "sphere", "square pyramid", "triangle pyramid", "xxx"]
 height_shapes = ["cuboid", "cylinder", "cone", "square_pyramid", "triangle_pyramid"]
 length_shapes = ["cuboid", "triangular_prism"]
 width_shapes = ["cuboid", "square_pyramid", "triangle_pyramid"]
@@ -123,13 +140,36 @@ volumes = []
 surface_areas = []
 
 # main routine
-while True:
 
-    # asks the user which shape they would like to calculate and replaces the spaces with underscores because functions can't have spaces
-    shape = string_checker("Which shape? ", ("cuboid", "cylinder", "triangular prism", "cone", "sphere",
-                                              "square pyramid", "triangle pyramid", "xxx"), None)
+# title
+print(statement_generator("3D Shapes Calculator", "~", 3))
+
+# asks to display instructions
+if yes_no_check(input("Show instructions? ")) == "yes":
+    print('''
+    
+    ''')
+
+while True:
+    while True:
+        # asks the user which shape they would like to calculate and replaces the spaces with underscores because functions can't have spaces
+        shape = string_checker("Which shape? ", valid_shapes, 2, "tr")
+        if shape in valid_shapes:
+            break
+        elif shape == "tr":
+            if yes_no_check("Did you mean triangular prism? ") == "no":
+                if yes_no_check("Did you mean triangle pyramid? ") == "yes":
+                    shape =  "triangle pyramid"
+                    break
+            else:
+                shape = "triangular prism"
+                break
+
     if shape == "xxx":
         break
+
+    # puts the shape into a list to call later and replaces spaces with underscores to call the function
+    shapes.append(shape)
     shape = shape.replace(" ", "_")
 
     # asks the user which unit they would like to use
@@ -155,11 +195,9 @@ while True:
 
     # runs the calculation function based on the shape the user selected
     exec(f"{shape}()")
-
-    # puts the shape and units into a list to call later
-    shapes.append(shape)
     print()
 
+# formats the pandas layout
 print()
 calculations_panda = {
     "Shape": shapes,
@@ -167,5 +205,6 @@ calculations_panda = {
     "Surface Area": surface_areas
 }
 
-panda = tabulate(pandas.DataFrame(calculations_panda), headers='keys', tablefmt='psql', showindex=False)
+# makes the panda look nice and prints it
+panda = tabulate(pandas.DataFrame(calculations_panda), headers='keys', tablefmt='simple_grid', showindex=False)
 print(panda)
